@@ -13,5 +13,6 @@ UCLASS()
 class BASEPROJECT_API AInitGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+	AInitGameModeBase();
 };
