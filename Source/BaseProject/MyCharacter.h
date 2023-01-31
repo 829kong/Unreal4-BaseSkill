@@ -18,6 +18,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 
 public:	
 	// Called every frame
@@ -27,10 +28,12 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void Attack();
+	void AttackCheck();
 
 	void UpDown(float Value);
 	void LeftRight(float Value);
 	void Yaw(float Value);
+	void Pitch(float Value);
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool binterrupted);
@@ -48,5 +51,12 @@ private:
 	UPROPERTY()
 	class UMyAnimInstance* AnimInstance;
 
+	UPROPERTY()
+	int32 AttackIndex = 0;
 
+public:
+	UPROPERTY()
+	float UpDownValue =0;
+	UPROPERTY()
+	float LeftRightValue =0;
 };

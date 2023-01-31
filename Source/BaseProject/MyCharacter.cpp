@@ -21,6 +21,7 @@ AMyCharacter::AMyCharacter()
 
 	SpringArm->TargetArmLength = 500.f;
 	SpringArm->SetRelativeRotation(FRotator(-35.f, 0.f, 0.f));
+	SpringArm->bUsePawnControlRotation = true;
 
 	GetMesh()->SetRelativeLocationAndRotation(
 		FVector(0.f, 0.f, -88.f), FRotator(0.f, -90.f, 0.f));
@@ -43,15 +44,25 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AMyCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
 	AnimInstance = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
-	AnimInstance->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
+	if (AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.AddDynamic(this, &AMyCharacter::OnAttackMontageEnded);
+		AnimInstance->OnAttackHit.AddUObject(this, &AMyCharacter::AttackCheck);
+	}
+
 }
 
 // Called every frame
 void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
 
 // Called to bind functionality to input
@@ -65,6 +76,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis(TEXT("UpDown"), this, &AMyCharacter::UpDown);
 	PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AMyCharacter::LeftRight);
 	PlayerInputComponent->BindAxis(TEXT("Yaw"), this, &AMyCharacter::Yaw);
+	PlayerInputComponent->BindAxis(TEXT("Pitch"), this, &AMyCharacter::Pitch);
 
 }
 
@@ -73,27 +85,43 @@ void AMyCharacter::Attack()
 	if (IsAttacking)
 		return;
 
-	if (AnimInstance)
-	{
-		AnimInstance->PlayAttackMontage();
-	}
+	AnimInstance->PlayAttackMontage();
+	AnimInstance->JumpToSection(AttackIndex); 
+
+	AttackIndex = (AttackIndex + 1) % 3;
 
 	IsAttacking = true;
 }
 
+void AMyCharacter::AttackCheck()
+{
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+
+	float AttackRange = 100.f;
+	float AttackRadius = 50.f;
+}
+
 void AMyCharacter::UpDown(float Value)
 {
+	UpDownValue = Value;
 	AddMovementInput(GetActorForwardVector(), Value);
 }
 
 void AMyCharacter::LeftRight(float Value)
 {
+	LeftRightValue = Value;
 	AddMovementInput(GetActorRightVector(), Value);
 }
 
 void AMyCharacter::Yaw(float Value)
 {
 	AddControllerYawInput(Value);
+}
+
+void AMyCharacter::Pitch(float Value)
+{
+	AddControllerPitchInput(Value);
 }
 
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool binterrupted)
