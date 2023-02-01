@@ -6,6 +6,8 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "MyAnimInstance.h"
+#include "DrawDebugHelpers.h"
+#include "MyWeapon.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -29,21 +31,32 @@ AMyCharacter::AMyCharacter()
 	struct FConstructorStatics
 	{
 		ConstructorHelpers::FObjectFinder<USkeletalMesh> GreyStone;
+		ConstructorHelpers::FObjectFinder<UStaticMesh> SW;
 
 		FConstructorStatics()
-			:GreyStone(TEXT("SkeletalMesh'/Game/ParagonGreystone/Characters/Heroes/Greystone/Meshes/Greystone.Greystone'"))
+			:GreyStone(TEXT("SkeletalMesh'/Game/ParagonGreystone/Characters/Heroes/Greystone/Meshes/Greystone.Greystone'")),
+			SW(TEXT("StaticMesh'/Game/ParagonGreystone/FX/Meshes/Heroes/Greystone/SM_Greystone_Blade_01.SM_Greystone_Blade_01'"))
 		{}
 	};
 
 	static FConstructorStatics ConstructorStatics;
 	GetMesh()->SetSkeletalMesh(ConstructorStatics.GreyStone.Object);
+
+	
 }
 
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	FName WeaponSocket(TEXT("hand_l_socket"));
+	auto DropWeapon = GetWorld()->SpawnActor<AMyWeapon>(SpawnVec, FRotator::ZeroRotator);
 	
+	if (DropWeapon)
+	{
+		
+	}
 }
 
 void AMyCharacter::PostInitializeComponents()
@@ -100,6 +113,33 @@ void AMyCharacter::AttackCheck()
 
 	float AttackRange = 100.f;
 	float AttackRadius = 50.f;
+
+	bool bResult = GetWorld()->SweepSingleByChannel(
+		OUT HitResult,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * AttackRange,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel2,
+		FCollisionShape::MakeSphere(AttackRadius),
+		Params
+	);
+
+	FVector Vec = GetActorForwardVector() * AttackRange;
+	FVector Center = GetActorLocation() + Vec * 0.5f;
+	float HalfHeight = AttackRange * 0.5f + AttackRadius;
+	FQuat Rotation = FRotationMatrix::MakeFromZ(Vec).ToQuat();
+	FColor DrawColor;
+	if (bResult)
+		DrawColor = FColor::Green;
+	else
+		DrawColor = FColor::Red;
+
+	DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius, Rotation, DrawColor, false, 1.f);
+
+	if (bResult && HitResult.Actor.IsValid())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Hit Actor : %s"), *HitResult.Actor->GetName());
+	}
 }
 
 void AMyCharacter::UpDown(float Value)

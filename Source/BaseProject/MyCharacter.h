@@ -59,4 +59,10 @@ public:
 	float UpDownValue =0;
 	UPROPERTY()
 	float LeftRightValue =0;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* Weapon;
+
+	UPROPERTY()
+	FVector SpawnVec = FVector(16854.f, 3356.f, 1028.f);
 };
