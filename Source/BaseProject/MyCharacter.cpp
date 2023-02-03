@@ -8,6 +8,7 @@
 #include "MyAnimInstance.h"
 #include "DrawDebugHelpers.h"
 #include "MyWeapon.h"
+#include "MyStatComponent.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -42,6 +43,7 @@ AMyCharacter::AMyCharacter()
 	static FConstructorStatics ConstructorStatics;
 	GetMesh()->SetSkeletalMesh(ConstructorStatics.GreyStone.Object);
 
+	Stat = CreateDefaultSubobject<UMyStatComponent>(TEXT("STAT"));
 	
 }
 
@@ -85,6 +87,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AMyCharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AMyCharacter::Attack);
+	PlayerInputComponent->BindAction(TEXT("Drop"), EInputEvent::IE_Pressed, this, &AMyCharacter::Drop);
 
 	PlayerInputComponent->BindAxis(TEXT("UpDown"), this, &AMyCharacter::UpDown);
 	PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AMyCharacter::LeftRight);
@@ -139,7 +142,17 @@ void AMyCharacter::AttackCheck()
 	if (bResult && HitResult.Actor.IsValid())
 	{
 		UE_LOG(LogTemp, Log, TEXT("Hit Actor : %s"), *HitResult.Actor->GetName());
+
+		FDamageEvent DamageEvent;
+		HitResult.Actor->TakeDamage(Stat->GetAttack(), DamageEvent, GetController(), this);
 	}
+
+
+}
+
+void AMyCharacter::Drop()
+{
+	
 }
 
 void AMyCharacter::UpDown(float Value)
@@ -169,4 +182,10 @@ void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool binterrupted
 	IsAttacking = false;
 }
 
-	 
+
+float AMyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	Stat->OnAttacked(DamageAmount);
+
+	return DamageAmount; 
+}

@@ -29,6 +29,7 @@ public:
 
 	void Attack();
 	void AttackCheck();
+	void Drop();
 
 	void UpDown(float Value);
 	void LeftRight(float Value);
@@ -37,6 +38,8 @@ public:
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool binterrupted);
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -65,4 +68,9 @@ public:
 
 	UPROPERTY()
 	FVector SpawnVec = FVector(16854.f, 3356.f, 1028.f);
+
+	UPROPERTY()
+	class UMyStatComponent* Stat;
+
+
 };
