@@ -9,6 +9,9 @@
 #include "DrawDebugHelpers.h"
 #include "MyWeapon.h"
 #include "MyStatComponent.h"
+#include "Components/WidgetComponent.h"
+#include "MyCharacterWidget.h"
+#include "MyAIController.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -33,10 +36,12 @@ AMyCharacter::AMyCharacter()
 	{
 		ConstructorHelpers::FObjectFinder<USkeletalMesh> GreyStone;
 		ConstructorHelpers::FObjectFinder<UStaticMesh> SW;
+		ConstructorHelpers::FClassFinder<UUserWidget> UW;
 
 		FConstructorStatics()
-			:GreyStone(TEXT("SkeletalMesh'/Game/ParagonGreystone/Characters/Heroes/Greystone/Meshes/Greystone.Greystone'")),
-			SW(TEXT("StaticMesh'/Game/ParagonGreystone/FX/Meshes/Heroes/Greystone/SM_Greystone_Blade_01.SM_Greystone_Blade_01'"))
+			:GreyStone(TEXT("SkeletalMesh'/Game/Graphics/ParagonGreystone/Characters/Heroes/Greystone/Meshes/Greystone.Greystone'")),
+			SW(TEXT("StaticMesh'/Game/Graphics/ParagonGreystone/FX/Meshes/Heroes/Greystone/SM_Greystone_Blade_01.SM_Greystone_Blade_01'")),
+			UW(TEXT("WidgetBlueprint'/Game/UI/WBP_HpBar.WBP_HpBar_C'"))
 		{}
 	};
 
@@ -44,7 +49,20 @@ AMyCharacter::AMyCharacter()
 	GetMesh()->SetSkeletalMesh(ConstructorStatics.GreyStone.Object);
 
 	Stat = CreateDefaultSubobject<UMyStatComponent>(TEXT("STAT"));
-	
+	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBAR"));
+
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetRelativeLocation(FVector(0.f, 0.f, 210.f));
+	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+
+	if (ConstructorStatics.UW.Succeeded())
+	{
+		HpBar->SetWidgetClass(ConstructorStatics.UW.Class);
+		HpBar->SetDrawSize(FVector2D(200.f, 50.f));
+	}
+	 
+	AIControllerClass = AMyAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 // Called when the game starts or when spawned
@@ -71,6 +89,12 @@ void AMyCharacter::PostInitializeComponents()
 		AnimInstance->OnAttackHit.AddUObject(this, &AMyCharacter::AttackCheck);
 	}
 
+	HpBar->InitWidget();
+	auto HpWidget = Cast<UMyCharacterWidget>(HpBar->GetUserWidgetObject());
+	if (HpWidget)
+	{
+		HpWidget->BindHp(Stat);
+	}
 }
 
 // Called every frame

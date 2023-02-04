@@ -18,7 +18,7 @@ AMyWeapon::AMyWeapon()
 		ConstructorHelpers::FObjectFinder<UStaticMesh> SW;
 
 		FConstructorStatics()
-			:SW(TEXT("StaticMesh'/Game/ParagonGreystone/FX/Meshes/Heroes/Greystone/SM_Greystone_Blade_01.SM_Greystone_Blade_01'"))
+			:SW(TEXT("StaticMesh'/Game/Graphics/ParagonGreystone/FX/Meshes/Heroes/Greystone/SM_Greystone_Blade_01.SM_Greystone_Blade_01'"))
 		{}
 	};
 

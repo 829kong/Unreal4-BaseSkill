@@ -66,11 +66,12 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* Weapon;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	FVector SpawnVec = FVector(16854.f, 3356.f, 1028.f);
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	class UMyStatComponent* Stat;
 
-
+	UPROPERTY(VisibleAnywhere)
+	class UWidgetComponent* HpBar;
 };
