@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "MyCharacter.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
+
 UCLASS()
 class BASEPROJECT_API AMyCharacter : public ACharacter
 {
@@ -38,6 +40,7 @@ public:
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool binterrupted);
+	FOnAttackEnd OnAttackEnd;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	

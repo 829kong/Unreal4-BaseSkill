@@ -204,6 +204,7 @@ void AMyCharacter::Pitch(float Value)
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool binterrupted)
 {
 	IsAttacking = false;
+	OnAttackEnd.Broadcast();
 }
 
 

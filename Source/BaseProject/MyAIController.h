@@ -24,5 +24,11 @@ private:
 	void RandomMove();
 
 	FTimerHandle TimerHandle;
+
+	UPROPERTY()
+	UBehaviorTree* BehaviorTree;
+
+	UPROPERTY()
+	UBlackboardData* BlackboardData;
 	
 };
